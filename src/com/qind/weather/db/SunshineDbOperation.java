@@ -21,7 +21,7 @@ public class SunshineDbOperation {
 	private SunshineDbOperation(Context context) {
 		SunshineWeatherDbHelper dbHelper = new SunshineWeatherDbHelper(context,
 				DB_NAME, null, DB_VERSION);
-		dbHelper.getWritableDatabase();
+		db = dbHelper.getWritableDatabase();
 	}
 
 	public synchronized static SunshineDbOperation getInstance(Context context) {
