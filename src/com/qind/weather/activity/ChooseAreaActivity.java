@@ -17,9 +17,13 @@ import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -52,6 +56,15 @@ public class ChooseAreaActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		if (prefs.getBoolean("city_selected", false)) {
+			Intent i = new Intent(this, WeatherActivity.class);
+			startActivity(i);
+			finish();
+			return;
+		}
 		setContentView(R.layout.choose_area);
 		init();
 		setListener();
@@ -81,6 +94,12 @@ public class ChooseAreaActivity extends Activity {
 				} else if (currentLevel == LEVEL_CITY) {
 					selectedCity = cityList.get(arg2);
 					queryCounties();
+				}else if(currentLevel == LEVEL_COUNTY){
+					String countyCode = countyList.get(arg2).getCountyCode();
+					Intent i = new Intent(context, WeatherActivity.class);
+					i.putExtra("county_code", countyCode);
+					startActivity(i);
+					finish();
 				}
 			}
 
@@ -143,8 +162,10 @@ public class ChooseAreaActivity extends Activity {
 		// TODO Auto-generated method stub
 		String address;
 		if (!TextUtils.isEmpty(code)) {
-			address = "http://www.weather.com.cn/data/list3/city"+code+".xml";
-//			address = "http://www.webxml.com.cn/WebServices/WeatherWebService.asmx/getSupportCity";
+			address = "http://www.weather.com.cn/data/list3/city" + code
+					+ ".xml";
+			// address =
+			// "http://www.webxml.com.cn/WebServices/WeatherWebService.asmx/getSupportCity";
 		} else {
 			address = "http://www.weather.com.cn/data/list3/city.xml";
 		}
