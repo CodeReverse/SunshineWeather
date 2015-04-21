@@ -7,19 +7,14 @@
     <com.handmark.pulltorefresh.library.PullToRefreshScrollView
         android:id="@+id/pull_to_refresh_listview"
         android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" >
+        android:layout_height="fill_parent"
+        android:fillViewport="true" >
 
-        <ScrollView
+        <fragment
+            android:id="@+id/fl_weatherinfo"
+            android:name="com.qind.weather.activity.WeatherInfoFragment"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" >
-
-            <fragment
-                android:id="@+id/fl_weatherinfo"
-                android:name="com.qind.weather.activity.WeatherInfoFragment"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent" />
-        </ScrollView>
+            android:layout_height="fill_parent" />
     </com.handmark.pulltorefresh.library.PullToRefreshScrollView>
 
 </LinearLayout>
