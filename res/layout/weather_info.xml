@@ -6,7 +6,16 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp" >
+        android:layout_height="50dp"
+        android:background="#ffab91" >
+
+        <Button
+            android:id="@+id/switch_city"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/title_city" />
 
         <TextView
             android:id="@+id/tv_cityName"
@@ -19,7 +28,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:background="#607d8b" >
 
         <TextView
             android:id="@+id/tv_publishText"

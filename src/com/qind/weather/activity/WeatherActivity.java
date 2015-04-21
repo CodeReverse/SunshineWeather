@@ -13,6 +13,7 @@ import com.qind.weather.utils.Utility;
 import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -60,6 +62,7 @@ public class WeatherActivity extends Activity {
 		temp1Text = (TextView) findViewById(R.id.temp1);
 		temp2Text = (TextView) findViewById(R.id.temp2);
 		currentDateText = (TextView) findViewById(R.id.tv_date);
+		switchCity = (Button) findViewById(R.id.switch_city);
 		pullToRefreshScrollView = (PullToRefreshScrollView) findViewById(R.id.pull_to_refresh_listview);
 		String countyCode = getIntent().getStringExtra("county_code");
 		if (!TextUtils.isEmpty(countyCode)) {
@@ -138,6 +141,18 @@ public class WeatherActivity extends Activity {
 
 	private void setListener() {
 		// TODO Auto-generated method stub
+		switchCity.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(WeatherActivity.this,
+						ChooseAreaActivity.class);
+				intent.putExtra("from_weather_activity", true);
+				startActivity(intent);
+				finish();
+			}
+		});
 		pullToRefreshScrollView
 				.setOnRefreshListener(new OnRefreshListener<ScrollView>() {
 
@@ -168,9 +183,11 @@ public class WeatherActivity extends Activity {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			// Simulates a background job.
-			try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e) {
+			SharedPreferences prefs = PreferenceManager
+					.getDefaultSharedPreferences(WeatherActivity.this);
+			String weatherCode = prefs.getString("weather_code", "");
+			if (!TextUtils.isEmpty(weatherCode)) {
+				queryWeatherInfo(weatherCode);
 			}
 			return null;
 		}
@@ -181,6 +198,7 @@ public class WeatherActivity extends Activity {
 			// ada.notifyDataSetChanged();
 
 			// Call onRefreshComplete when the list has been refreshed.
+			publishText.setText("同步中……");
 			pullToRefreshScrollView.onRefreshComplete();
 			super.onPostExecute(result);
 		}
