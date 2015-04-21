@@ -1,5 +1,12 @@
 package com.qind.weather.activity;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.qind.weather.R;
 import com.qind.weather.utils.HttpUtil;
 import com.qind.weather.utils.Utility;
@@ -7,13 +14,17 @@ import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class WeatherActivity extends Activity {
@@ -26,6 +37,9 @@ public class WeatherActivity extends Activity {
 	private TextView currentDateText;
 	private Button switchCity;
 	private Button RefreshWeather;
+
+	private PullToRefreshScrollView pullToRefreshScrollView;
+	private LinkedList<String> mListItems;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +60,7 @@ public class WeatherActivity extends Activity {
 		temp1Text = (TextView) findViewById(R.id.temp1);
 		temp2Text = (TextView) findViewById(R.id.temp2);
 		currentDateText = (TextView) findViewById(R.id.tv_date);
+		pullToRefreshScrollView = (PullToRefreshScrollView) findViewById(R.id.pull_to_refresh_listview);
 		String countyCode = getIntent().getStringExtra("county_code");
 		if (!TextUtils.isEmpty(countyCode)) {
 			publishText.setText("同步中");
@@ -123,6 +138,52 @@ public class WeatherActivity extends Activity {
 
 	private void setListener() {
 		// TODO Auto-generated method stub
+		pullToRefreshScrollView
+				.setOnRefreshListener(new OnRefreshListener<ScrollView>() {
 
+					@Override
+					public void onRefresh(
+							PullToRefreshBase<ScrollView> refreshView) {
+						// TODO Auto-generated method stub
+						String label = DateUtils.formatDateTime(
+								getApplicationContext(),
+								System.currentTimeMillis(),
+								DateUtils.FORMAT_SHOW_TIME
+										| DateUtils.FORMAT_SHOW_DATE
+										| DateUtils.FORMAT_ABBREV_ALL);
+
+						// Update the LastUpdatedLabel
+						refreshView.getLoadingLayoutProxy()
+								.setLastUpdatedLabel(label);
+
+						// Do work to refresh the list here.
+						new GetDataTask().execute();
+					}
+
+				});
 	}
+
+	private class GetDataTask extends AsyncTask<Void, Void, String[]> {
+
+		@Override
+		protected String[] doInBackground(Void... params) {
+			// Simulates a background job.
+			try {
+				Thread.sleep(4000);
+			} catch (InterruptedException e) {
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String[] result) {
+			// mListItems.addFirst("Added after refresh...");
+			// ada.notifyDataSetChanged();
+
+			// Call onRefreshComplete when the list has been refreshed.
+			pullToRefreshScrollView.onRefreshComplete();
+			super.onPostExecute(result);
+		}
+	}
+
 }
