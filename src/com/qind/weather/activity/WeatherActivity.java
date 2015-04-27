@@ -1,19 +1,13 @@
 package com.qind.weather.activity;
 
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
-
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
-import com.handmark.pulltorefresh.library.PullToRefreshListView;
-import com.qind.weather.R;
-import com.qind.weather.utils.HttpUtil;
-import com.qind.weather.utils.Utility;
-import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
+import java.util.Locale;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,23 +19,49 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class WeatherActivity extends Activity {
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.baidu.location.LocationClientOption.LocationMode;
+import com.google.gson.Gson;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
+import com.lidroid.xutils.HttpUtils;
+import com.lidroid.xutils.exception.HttpException;
+import com.lidroid.xutils.http.ResponseInfo;
+import com.lidroid.xutils.http.callback.RequestCallBack;
+import com.lidroid.xutils.http.client.HttpRequest.HttpMethod;
+import com.qind.weather.Constant;
+import com.qind.weather.R;
+import com.qind.weather.model.JsonInfo;
+import com.qind.weather.model.WeatherData;
+import com.qind.weather.model.WeatherResults;
+import com.qind.weather.utils.HttpUtil;
+import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
+import com.qind.weather.utils.Utility;
+
+public class WeatherActivity extends BaseActivity {
+	private Context context = WeatherActivity.this;
 	private LinearLayout weatherInfoLayout;
 	private TextView cityNameText;
 	private TextView publishText;
-	private TextView weatherInfoText;
-	private TextView temp1Text;
-	private TextView temp2Text;
-	private TextView currentDateText;
+	private TextView DescriptionText, windText, tempText, currentDateText;
 	private Button switchCity;
 	private Button RefreshWeather;
 
 	private PullToRefreshScrollView pullToRefreshScrollView;
 	private LinkedList<String> mListItems;
+
+	private LocationClient mLocationClient;
+	public MyLocationListener mMyLocationListener;
+	private LocationMode mode = LocationMode.Hight_Accuracy;
+	private String coor = "gcj02";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +69,69 @@ public class WeatherActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.weather_layout);
+		mLocationClient = new LocationClient(getApplicationContext());
+		mMyLocationListener = new MyLocationListener();
+		mLocationClient.registerLocationListener(mMyLocationListener);
+		initLocation();
 		init();
 		setListener();
+		BaseActivity.addActivity(this);
+		if (SunshineApplication.isFirstLoad && Utility.isConnected(context)) {
+			mLocationClient.start();
+		} else if (Utility.isConnected(context) == false) {
+			Utility.openNetworkSetting(this);
+		}
+	}
+
+	private void initLocation() {
+		// TODO Auto-generated method stub
+		LocationClientOption option = new LocationClientOption();
+		option.setLocationMode(mode);// 设置定位模式
+		option.setCoorType(coor);// 返回的定位结果是百度经纬度，默认值gcj02
+		option.setIsNeedAddress(true);
+		mLocationClient.setLocOption(option);
+	}
+
+	/**
+	 * 实现实位回调监听
+	 */
+	public class MyLocationListener implements BDLocationListener {
+
+		@Override
+		public void onReceiveLocation(BDLocation location) {
+			// Receive Location
+			StringBuffer sb = new StringBuffer(256);
+			sb.append("time : ");
+			sb.append(location.getTime());
+			sb.append("\nerror code : ");
+			sb.append(location.getLocType());
+			sb.append("\nlatitude : ");
+			sb.append(location.getLatitude());
+			sb.append("\nlontitude : ");
+			sb.append(location.getLongitude());
+			sb.append("\nradius : ");
+			sb.append(location.getRadius());
+			if (location.getLocType() == BDLocation.TypeGpsLocation) {
+				sb.append("\nspeed : ");
+				sb.append(location.getSpeed());
+				sb.append("\nsatellite : ");
+				sb.append(location.getSatelliteNumber());
+				sb.append("\ndirection : ");
+				sb.append("\naddr : ");
+				sb.append(location.getAddrStr());
+				sb.append(location.getDirection());
+			} else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {
+				sb.append("\naddr : ");
+				sb.append(location.getAddrStr());
+				// 运营商信息
+				sb.append("\noperationers : ");
+				sb.append(location.getOperators());
+			}
+			System.out.println(sb.toString());
+			getWeatherInfo(location.getLatitude() + "", location.getLongitude()
+					+ "");
+		}
+
 	}
 
 	private void init() {
@@ -58,33 +139,25 @@ public class WeatherActivity extends Activity {
 		weatherInfoLayout = (LinearLayout) findViewById(R.id.ll_weatherInfo);
 		cityNameText = (TextView) findViewById(R.id.tv_cityName);
 		publishText = (TextView) findViewById(R.id.tv_publishText);
-		weatherInfoText = (TextView) findViewById(R.id.tv_description);
-		temp1Text = (TextView) findViewById(R.id.temp1);
-		temp2Text = (TextView) findViewById(R.id.temp2);
+		DescriptionText = (TextView) findViewById(R.id.tv_description);
+		tempText = (TextView) findViewById(R.id.tv_temp);
+		windText = (TextView) findViewById(R.id.tv_wind);
 		currentDateText = (TextView) findViewById(R.id.tv_date);
 		switchCity = (Button) findViewById(R.id.switch_city);
 		pullToRefreshScrollView = (PullToRefreshScrollView) findViewById(R.id.pull_to_refresh_listview);
-		String countyCode = getIntent().getStringExtra("county_code");
-		if (!TextUtils.isEmpty(countyCode)) {
-			publishText.setText("同步中");
-			weatherInfoLayout.setVisibility(View.INVISIBLE);
-			cityNameText.setVisibility(View.INVISIBLE);
-			queryWeatherCode(countyCode);
-		} else {
-			showWeather();
-		}
 	}
 
 	private void showWeather() {
 		// TODO Auto-generated method stub
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm", Locale.CHINA);
 		cityNameText.setText(prefs.getString("city_name", ""));
-		temp1Text.setText(prefs.getString("temp1", ""));
-		temp2Text.setText(prefs.getString("temp2", ""));
-		weatherInfoText.setText(prefs.getString("weather_desp", ""));
-		publishText.setText("今天" + prefs.getString("publish_time", "") + "发布");
+		tempText.setText(prefs.getString("temp", ""));
+		DescriptionText.setText(prefs.getString("weather_desp", ""));
+		publishText.setText("更新于" + sdf.format(new Date()));
 		currentDateText.setText(prefs.getString("current_date", ""));
+		windText.setText(prefs.getString("wind", ""));
 		weatherInfoLayout.setVisibility(View.VISIBLE);
 		cityNameText.setVisibility(View.VISIBLE);
 	}
@@ -97,8 +170,9 @@ public class WeatherActivity extends Activity {
 	}
 
 	private void queryWeatherInfo(String weatherCode) {
-		String address = "http://www.weather.com.cn/data/cityinfo/"
-				+ weatherCode + ".html";
+		String address = "http://m.weather.com.cn/data/" + weatherCode
+				+ ".html";
+		System.out.println("address: " + address);
 		queryFromServer(address, "weatherCode");
 	}
 
@@ -146,11 +220,12 @@ public class WeatherActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent = new Intent(WeatherActivity.this,
-						ChooseAreaActivity.class);
-				intent.putExtra("from_weather_activity", true);
-				startActivity(intent);
-				finish();
+				// Intent intent = new Intent(WeatherActivity.this,
+				// ChooseAreaActivity.class);
+				// intent.putExtra("from_weather_activity", true);
+				// startActivity(intent);
+				// finish();
+				mLocationClient.start();
 			}
 		});
 		pullToRefreshScrollView
@@ -183,12 +258,7 @@ public class WeatherActivity extends Activity {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			// Simulates a background job.
-			SharedPreferences prefs = PreferenceManager
-					.getDefaultSharedPreferences(WeatherActivity.this);
-			String weatherCode = prefs.getString("weather_code", "");
-			if (!TextUtils.isEmpty(weatherCode)) {
-				queryWeatherInfo(weatherCode);
-			}
+			mLocationClient.start();
 			return null;
 		}
 
@@ -204,4 +274,43 @@ public class WeatherActivity extends Activity {
 		}
 	}
 
+	private void getWeatherInfo(String a, String b) {
+		HttpUtils httpUtils = new HttpUtils();
+		String url = Constant.WEATHER_URL + b + "," + a + "&output=json&ak="
+				+ Constant.BAIDU_AK + "&mcode=" + Constant.BAIDU_MCODE;
+		System.out.println(url);
+		httpUtils.send(HttpMethod.GET, url, new RequestCallBack<String>() {
+
+			@Override
+			public void onFailure(HttpException arg0, String arg1) {
+				// TODO Auto-generated method stub
+				Toast.makeText(context, arg1, Toast.LENGTH_LONG).show();
+			}
+
+			@Override
+			public void onSuccess(ResponseInfo<String> arg0) {
+				// TODO Auto-generated method stub
+				Gson gson = new Gson();
+				JsonInfo jsonInfo = gson.fromJson(arg0.result, JsonInfo.class);
+				WeatherResults weatherResults = jsonInfo.getResults().get(0);
+				ArrayList<WeatherData> weatherDatas = (ArrayList<WeatherData>) weatherResults
+						.getWeather_data();
+				WeatherData weatherData = weatherDatas.get(0);
+				System.out.println(weatherData.getDate()
+						+ weatherData.getTemperature() + weatherData.getWind());
+				SharedPreferences.Editor editor = PreferenceManager
+						.getDefaultSharedPreferences(WeatherActivity.this)
+						.edit();
+				editor.putString("city_name", weatherResults.getCurrentCity());
+				editor.putString("temp", weatherData.getTemperature());
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日",
+						Locale.CHINA);
+				editor.putString("current_date", sdf.format(new Date()));
+				editor.putString("weather_desp", weatherData.getWeather());
+				editor.putString("wind", weatherData.getWind());
+				editor.commit();
+				showWeather();
+			}
+		});
+	}
 }

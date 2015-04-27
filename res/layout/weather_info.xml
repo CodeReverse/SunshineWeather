@@ -62,35 +62,19 @@
                 android:gravity="center"
                 android:textSize="40sp" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_temp"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_gravity="center_horizontal"
-                android:orientation="horizontal" >
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="40sp" />
 
-                <TextView
-                    android:id="@+id/temp1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="40sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:text="~"
-                    android:textSize="40sp" />
-
-                <TextView
-                    android:id="@+id/temp2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="40sp" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/tv_wind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="40sp" />
         </LinearLayout>
     </RelativeLayout>
 
