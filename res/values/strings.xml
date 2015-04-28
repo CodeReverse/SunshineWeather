@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">com.qind.weather</string>
+    <string name="app_name">晴天</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 

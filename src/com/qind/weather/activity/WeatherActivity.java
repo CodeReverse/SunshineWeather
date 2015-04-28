@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -19,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,13 +32,14 @@ import com.google.gson.Gson;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest.HttpMethod;
-import com.qind.weather.Constant;
 import com.qind.weather.R;
+import com.qind.weather.constant.Constant;
 import com.qind.weather.model.JsonInfo;
 import com.qind.weather.model.WeatherData;
 import com.qind.weather.model.WeatherResults;
@@ -56,7 +57,9 @@ public class WeatherActivity extends BaseActivity {
 	private Button RefreshWeather;
 
 	private PullToRefreshScrollView pullToRefreshScrollView;
+	private SlidingMenu slidingMenu;
 	private LinkedList<String> mListItems;
+	private ListView filterList;
 
 	private LocationClient mLocationClient;
 	public MyLocationListener mMyLocationListener;
@@ -145,6 +148,14 @@ public class WeatherActivity extends BaseActivity {
 		currentDateText = (TextView) findViewById(R.id.tv_date);
 		switchCity = (Button) findViewById(R.id.switch_city);
 		pullToRefreshScrollView = (PullToRefreshScrollView) findViewById(R.id.pull_to_refresh_listview);
+		slidingMenu = new SlidingMenu(this);
+		slidingMenu.setMode(SlidingMenu.LEFT);
+		slidingMenu.setFadeDegree(0.35f);
+		slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+		slidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
+		slidingMenu.setMenu(R.layout.slidingmenu);
+		slidingMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
+		filterList = (ListView) findViewById(R.id.lv_filterlist);
 	}
 
 	private void showWeather() {

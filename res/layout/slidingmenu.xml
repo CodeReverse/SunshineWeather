@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical" >
+
+    <com.jeremyfeinstein.slidingmenu.lib.SlidingMenu
+        android:id="@+id/slidingmenu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="40dp" >
+
+        <com.qind.weather.widget.EditTextWithDelete
+            android:id="@+id/et_searchcity"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input"
+            android:hint="添加城市"
+            android:padding="10dp"
+            android:textColor="#000000" />
+
+        <ListView
+            android:id="@+id/lv_filterlist"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </com.jeremyfeinstein.slidingmenu.lib.SlidingMenu>
+
+</LinearLayout>

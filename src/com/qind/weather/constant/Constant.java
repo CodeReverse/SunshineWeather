@@ -1,4 +1,4 @@
-package com.qind.weather;
+package com.qind.weather.constant;
 
 public class Constant {
 	public static final String WEATHER_URL = "http://api.map.baidu.com/telematics/v3/weather?location=";
