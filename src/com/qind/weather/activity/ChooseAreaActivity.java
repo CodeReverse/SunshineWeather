@@ -108,7 +108,6 @@ public class ChooseAreaActivity extends Activity {
 
 		});
 		queryProvinces();
-
 	}
 
 	private void queryProvinces() {
