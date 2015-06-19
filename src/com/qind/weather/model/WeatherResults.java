@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class WeatherResults implements Serializable {
+	private static final long serialVersionUID = -336068401391163102L;
 	private String currentCity;
 	private String pm25;
 	private List<WeatherTips> index;

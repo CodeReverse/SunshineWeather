@@ -1,6 +1,5 @@
 package com.qind.weather.model;
 
-import java.util.List;
 
 public class WeatherTips {
 	private String title;

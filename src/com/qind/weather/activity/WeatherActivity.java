@@ -52,15 +52,16 @@ import com.qind.weather.model.WeatherResults;
 import com.qind.weather.utils.HttpUtil;
 import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
 import com.qind.weather.utils.Utility;
+import com.qind.weather.widget.ClearEditText;
 
 public class WeatherActivity extends BaseActivity implements OnRefreshListener<ScrollView> {
 	private TextView cityNameText;
 	private TextView publishText;
-	private TextView DescriptionText; 
+	private TextView DescriptionText;
 	private TextView windText;
 	private TextView tempText;
 	private TextView currentDateText;
-	private EditText searchcityEt;
+	private ClearEditText searchcityEt;
 	private Button switchCity;
 	private LinearLayout weatherInfoLayout;
 
@@ -163,7 +164,7 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		slidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
 		slidingMenu.setMenu(R.layout.slidingmenu);
 		slidingMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
-		searchcityEt = (EditText) slidingMenu.findViewById(R.id.et_searchcity);
+		searchcityEt = (ClearEditText) slidingMenu.findViewById(R.id.et_searchcity);
 		searchcityEt.addTextChangedListener(textWatcher);
 	}
 
@@ -240,10 +241,6 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 
 		@Override
 		public void onTextChanged(CharSequence s, int start, int before, int count) {
-			String key = searchcityEt.getText().toString();
-			if (key != null && !TextUtils.isEmpty(key)) {
-				queryFromDatebase(key);
-			}
 		}
 
 		@Override
@@ -252,6 +249,10 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 
 		@Override
 		public void afterTextChanged(Editable s) {
+			String key = searchcityEt.getText().toString();
+			if (!TextUtils.isEmpty(key)) {
+				queryFromDatebase(key);
+			}
 		}
 	};
 
@@ -351,14 +352,14 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		if (null != key && !TextUtils.isEmpty(key)) {
 			cursor = db.query("County", null, "county_name like ? ", new String[] { "%" + key + "%" }, null, null, null);
 		}
-		cursor.moveToFirst();
-		while (cursor.moveToNext()) {
-			Map<String, String> stockMap = new HashMap<String, String>();
-			String name = cursor.getString(1);
-			stockMap.put("name", name);
-			System.out.println(name);
+		if (cursor != null && cursor.getCount() > 0) {
+			while (cursor.moveToNext()) {
+				Map<String, String> stockMap = new HashMap<String, String>();
+				String name = cursor.getString(1);
+				stockMap.put("name", name);
+				System.out.println(name);
+			}
 		}
 	}
-
 
 }

@@ -3,6 +3,7 @@ package com.qind.weather.model;
 import java.io.Serializable;
 
 public class WeatherData implements Serializable {
+	private static final long serialVersionUID = -1108413379932943270L;
 	private String date;
 	private String dayPictureUrl;
 	private String nightPictureUrl;

@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:layout_margin="40dp" >
 
-        <com.qind.weather.widget.EditTextWithDelete
+        <com.qind.weather.widget.ClearEditText
             android:id="@+id/et_searchcity"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
