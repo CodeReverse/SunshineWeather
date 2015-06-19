@@ -22,7 +22,6 @@ public class HttpUtil {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				HttpURLConnection urlConnection = null;
 				try {
 					URL url = new URL(address);
@@ -42,7 +41,6 @@ public class HttpUtil {
 						listener.onFinish(response.toString());
 					}
 				} catch (Exception e) {
-					// TODO: handle exception
 					if (listener != null) {
 						listener.onFailed(e);
 					}

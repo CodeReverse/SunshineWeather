@@ -5,29 +5,19 @@ import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 
-public class BaseActivity extends Activity {
+public class BaseActivity extends Activity implements OnClickListener{
 	public static List<Activity> activities = new ArrayList<Activity>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		AppManager.getInstance().addActivity(this);
 	}
 
-	public static void addActivity(Activity activity) {
-		activities.add(activity);
-	}
-
-	public static void removeActivity(Activity activity) {
-		activities.remove(activity);
-	}
-
-	public static void finishAll() {
-		for (Activity activity : activities) {
-			if (!activity.isFinishing()) {
-				activity.finish();
-			}
-		}
+	@Override
+	public void onClick(View v) {
 	}
 }

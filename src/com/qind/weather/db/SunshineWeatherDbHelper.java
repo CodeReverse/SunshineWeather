@@ -10,7 +10,6 @@ public class SunshineWeatherDbHelper extends SQLiteOpenHelper {
 	public SunshineWeatherDbHelper(Context context, String name,
 			CursorFactory factory, int version) {
 		super(context, name, factory, version);
-		// TODO Auto-generated constructor stub
 	}
 
 	public static final String CREATE_PROVINCE = "create table Province("
@@ -27,7 +26,6 @@ public class SunshineWeatherDbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		// TODO Auto-generated method stub
 		db.execSQL(CREATE_PROVINCE);
 		db.execSQL(CREATE_CITY);
 		db.execSQL(CREATE_COUNTY);
@@ -35,7 +33,6 @@ public class SunshineWeatherDbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
 
 	}
 

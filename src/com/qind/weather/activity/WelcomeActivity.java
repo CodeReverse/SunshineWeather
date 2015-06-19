@@ -7,23 +7,32 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 
 public class WelcomeActivity extends Activity {
+	private ImageView splashImg;
 	private Handler handler = new Handler();
 	private Intent intent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE); 
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.welcome_layout);
+		
+		//设置启动页动画效果
+		splashImg = (ImageView) findViewById(R.id.splashImg);
+		Animation animation = AnimationUtils.loadAnimation(this, R.anim.alpha_scale_translate);
+		animation.setFillAfter(true);
+		splashImg.setAnimation(animation);
+		
 		intent = new Intent(this, WeatherActivity.class);
 		handler.postDelayed(new Runnable() {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				startActivity(intent);
 				finish();
 			}

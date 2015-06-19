@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="crop__button_bar">#f3f3f3</color>
+    <color name="crop__button_text">#666666</color>
+    <color name="crop__selector_pressed">#1a000000</color>
+    <color name="crop__selector_focused">#77000000</color>
+    
+    <color name="myItemViewBackground">#ffffff</color>
+    <color name="listBackground">@android:color/darker_gray</color>
+    <!-- 天蓝色 -->
+    <color name="sky_blue">#0fe0ff</color>
+    <color name="soft_blue">#19adf8</color>
+    <color name="little_soft_blue">#29adf8</color>
+    <color name="hard_soft_blue">#09adf8</color>
+    <color name="wtf_soft_blue">#99adf8</color>
+    <!-- 字体颜色 -->
+    <color name="font_black">#333333</color>
+    <!-- 白色 -->
+    <color name="white">#ffffff</color>
+    <!-- 黑色 -->
+    <color name="black">#000000</color>
+    <color name="light_black">#28292e</color>
+    <!-- 灰色 -->
+    <color name="gray">#b3b3b3</color>
+    <!-- 浅灰色 -->
+    <color name="light_gray">#cccccc</color>
+    <!-- 棕色 -->
+    <color name="brown">#969689</color>
+    <!-- 透明色 -->
+    <color name="transparent">#00000000</color>
+    <!-- 深蓝色 -->
+    <color name="deep_blue">#0a212e</color>
+    <!-- 黄色 -->
+    <color name="yellow">#ffff00</color>
+    <!-- 红色 -->
+    <color name="red">#ff0000</color>
+    <!-- 绿色 -->
+    <color name="green">#44ce13</color>
+    <color name="light_green">#a2e78a</color>
+    <!-- 蓝色 -->
+    <color name="blue">#3399FF</color>
+    <!-- 金色 -->
+    <color name="gold">#b89766</color>
+    <!-- 深蓝 -->
+    <color name="more_blue">#3399ff</color>
+    <!-- 浅蓝 -->
+    <color name="little_blue">#953399ff</color>
+    <color name="littless_blue">#953399ff</color>
+    <!-- LIST BORDER COLOR -->
+    <color name="rounded_container_border">#ffb7babb</color>
+
+    <!-- 半透明 -->
+    <color name="half_transparent_color">#55000000</color>
+    <!-- 白色 -->
+    <color name="half_transparent_white">#00ffffff</color>
+    <color name="half_transparent_white_1">#11ffffff</color>
+    <color name="half_transparent_white_2">#22ffffff</color>
+    <color name="half_transparent_white_3">#33ffffff</color>
+    <color name="half_transparent_white_4">#44ffffff</color>
+    <color name="half_transparent_white_5">#55ffffff</color>
+    <color name="half_transparent_white_calendar">#66ffffff</color>
+    <color name="half_transparent_white_7">#77ffffff</color>
+    <color name="half_transparent_white_sublist">#88ffffff</color>
+    <color name="half_transparent_white_9">#99ffffff</color>
+    <color name="half_transparent_white_a">#aaffffff</color>
+    <color name="half_transparent_white_b">#bbffffff</color>
+    <color name="half_transparent_white_c">#ccffffff</color>
+    <color name="half_transparent_white_topbar">#ddffffff</color>
+    <color name="half_transparent_white_e">#eeffffff</color>
+    <color name="half_transparent_white_tab">#ffffffff</color>
+    <color name="half_transparent">#e0000000</color>
+    <color name="half_transparent_gray_d">#ddf0f0f0</color>
+    <color name="main_bg_color">#44efeff4</color>
+    <color name="rippelColor">#0099CC</color>
+
+    <color name="topbar">#28292E</color>
+    <color name="topbar_textcolor">#FCFCFC</color>
+    <color name="tab_textcolor_default">#1E1E1E</color>
+    <color name="tab_textcolor_selected">#FE9B37</color>
+    <color name="answer_split_line">#666666</color>
+    <color name="answer_explain_tips">#CCCCCC</color>
+    
+    <color name="user_right">#E044CE13</color>
+    <color name="user_wrong">#E0FF6100</color>
+	
+    <color name="radio_button_selected_color">#ff33b5e5</color>
+    <color name="radio_button_unselected_color">@color/transparent</color>
+</resources>

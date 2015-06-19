@@ -2,12 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     android:orientation="vertical" >
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="#ffab91" >
+        android:layout_height="50dp" >
 
         <Button
             android:id="@+id/switch_city"
@@ -22,14 +22,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:textColor="@color/white"
             android:textSize="24sp" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#607d8b" >
+        android:layout_weight="1" >
 
         <TextView
             android:id="@+id/tv_publishText"
@@ -38,6 +38,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
+            android:textColor="@color/white"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -52,6 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:gravity="center"
+                android:textColor="@color/white"
                 android:textSize="18sp" />
 
             <TextView
@@ -60,6 +62,7 @@
                 android:layout_height="60dp"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
+                android:textColor="@color/white"
                 android:textSize="40sp" />
 
             <TextView
@@ -67,6 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:textColor="@color/white"
                 android:textSize="40sp" />
 
             <TextView
@@ -74,6 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:textColor="@color/white"
                 android:textSize="40sp" />
         </LinearLayout>
     </RelativeLayout>

@@ -21,17 +21,16 @@ import com.qind.weather.model.County;
 import com.qind.weather.model.Province;
 
 public class Utility {
-	
+
 	// 工具类无需实例化
-		private Utility() {
-			throw new AssertionError();
-		}
-		
+	private Utility() {
+		throw new AssertionError();
+	}
+
 	/*
 	 * 解析和处理服务器返回的省级数据
 	 */
-	public synchronized static boolean handleProvinceResponse(
-			SunshineDbOperation dbOperation, String response) {
+	public synchronized static boolean handleProvinceResponse(SunshineDbOperation dbOperation, String response) {
 		if (!TextUtils.isEmpty(response)) {
 			String[] allProvinces = response.split(",");
 			if (allProvinces != null && allProvinces.length > 0) {
@@ -51,8 +50,7 @@ public class Utility {
 	/*
 	 * 解析和处理服务器返回的市级数据
 	 */
-	public synchronized static boolean handleCitiesResponse(
-			SunshineDbOperation dbOperation, String response, int provinceId) {
+	public synchronized static boolean handleCitiesResponse(SunshineDbOperation dbOperation, String response, int provinceId) {
 		if (!TextUtils.isEmpty(response)) {
 			String[] allCities = response.split(",");
 			if (allCities != null && allCities.length > 0) {
@@ -69,12 +67,11 @@ public class Utility {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * 解析和处理服务器返回的县级数据
 	 */
-	public synchronized static boolean handleCountiesResponse(
-			SunshineDbOperation dbOperation, String response, int cityId) {
+	public synchronized static boolean handleCountiesResponse(SunshineDbOperation dbOperation, String response, int cityId) {
 		if (!TextUtils.isEmpty(response)) {
 			String[] allCounties = response.split(",");
 			if (allCounties != null && allCounties.length > 0) {
@@ -91,11 +88,11 @@ public class Utility {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * 解析服务器返回的JSON数据并存储到本地
 	 */
-	public static void handleWeatherResponse(Context context,String response){
+	public static void handleWeatherResponse(Context context, String response) {
 		try {
 			JSONObject jsonObject = new JSONObject(response);
 			JSONObject weatherInfo = jsonObject.getJSONObject("weatherinfo");
@@ -105,9 +102,8 @@ public class Utility {
 			String temp2 = weatherInfo.getString("temp2");
 			String weatherDesp = weatherInfo.getString("weather");
 			String publishTime = weatherInfo.getString("ptime");
-			saveWeatherInfo(context,cityName,weatherCode,temp1,temp2,weatherDesp,publishTime);
+			saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -115,11 +111,9 @@ public class Utility {
 	/*
 	 * 将服务器返回的天气信息存储到SharedPreferences文件中。
 	 */
-	private static void saveWeatherInfo(Context context, String cityName,
-			String weatherCode, String temp1, String temp2, String weatherDesp,
-			String publishTime) {
-		// TODO Auto-generated method stub
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日",Locale.CHINA);
+	private static void saveWeatherInfo(Context context, String cityName, String weatherCode, String temp1, String temp2,
+			String weatherDesp, String publishTime) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
 		editor.putBoolean("city_selected", true);
 		editor.putString("city_name", cityName);
@@ -131,47 +125,41 @@ public class Utility {
 		editor.putString("current_date", sdf.format(new Date()));
 		editor.commit();
 	}
-	
+
 	// 判断网络是否连接
-		public static boolean isConnected(Context context) {
-			ConnectivityManager connectivityManager = (ConnectivityManager) context
-					.getSystemService(Context.CONNECTIVITY_SERVICE);
-			if (null != connectivityManager) {
-				NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-				if (null != info && info.isConnected()) {
-					if (info.getState() == NetworkInfo.State.CONNECTED) {
-						return true;
-					}
+	public static boolean isConnected(Context context) {
+		ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (null != connectivityManager) {
+			NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+			if (null != info && info.isConnected()) {
+				if (info.getState() == NetworkInfo.State.CONNECTED) {
+					return true;
 				}
 			}
+		}
+		return false;
+	}
+
+	// 判断wifi网络是否可用
+	public static boolean isWifiDataEnable(Context context) {
+		try {
+			ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+			boolean isWifiDataEnable = false;
+			isWifiDataEnable = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
+			return isWifiDataEnable;
+
+		} catch (Exception e) {
 			return false;
 		}
+	}
 
-		// 判断wifi网络是否可用
-		public static boolean isWifiDataEnable(Context context) {
-			try {
-				ConnectivityManager connectivityManager = (ConnectivityManager) context
-						.getSystemService(Context.CONNECTIVITY_SERVICE);
-				boolean isWifiDataEnable = false;
-				isWifiDataEnable = connectivityManager.getNetworkInfo(
-						ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
-				return isWifiDataEnable;
-
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				return false;
-			}
+	// 打开网络设置
+	public static void openNetworkSetting(Activity activity) {
+		if (android.os.Build.VERSION.SDK_INT > 10) {
+			activity.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+		} else {
+			activity.startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
 		}
-
-		// 打开网络设置
-		public static void openNetworkSetting(Activity activity) {
-			if (android.os.Build.VERSION.SDK_INT > 10) {
-				activity.startActivity(new Intent(
-						android.provider.Settings.ACTION_SETTINGS));
-			} else {
-				activity.startActivity(new Intent(
-						android.provider.Settings.ACTION_WIRELESS_SETTINGS));
-			}
-		}
+	}
 
 }

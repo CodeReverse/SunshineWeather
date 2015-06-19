@@ -16,11 +16,12 @@ public class SunshineDbOperation {
 	public static final String DB_NAME = "sunshine_weather";
 	public static final int DB_VERSION = 1;
 	private static SunshineDbOperation sunshineDbOperation;
-	private SQLiteDatabase db;
+	private static SQLiteDatabase db;
+	private SunshineWeatherDbHelper dbHelper;
 
 	private SunshineDbOperation(Context context) {
-		SunshineWeatherDbHelper dbHelper = new SunshineWeatherDbHelper(context,
-				DB_NAME, null, DB_VERSION);
+		dbHelper = new SunshineWeatherDbHelper(context, DB_NAME, null,
+				DB_VERSION);
 		db = dbHelper.getWritableDatabase();
 	}
 
@@ -30,6 +31,14 @@ public class SunshineDbOperation {
 		}
 		return sunshineDbOperation;
 
+	}
+
+	public SQLiteDatabase getWritableDatabase() {
+		return db;
+	}
+
+	public SQLiteDatabase getReadableDatabase() {
+		return dbHelper.getReadableDatabase();
 	}
 
 	/*
