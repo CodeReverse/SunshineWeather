@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class JsonInfo implements Serializable {
+	private static final long serialVersionUID = -3496728980422483173L;
 	private int error;
 	private String status;
 	private String date;

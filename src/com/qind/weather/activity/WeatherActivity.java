@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,8 +20,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -56,13 +53,15 @@ import com.qind.weather.utils.HttpUtil;
 import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
 import com.qind.weather.utils.Utility;
 
-public class WeatherActivity extends BaseActivity {
+public class WeatherActivity extends BaseActivity implements OnRefreshListener<ScrollView> {
 	private TextView cityNameText;
 	private TextView publishText;
-	private TextView DescriptionText, windText, tempText, currentDateText;
+	private TextView DescriptionText; 
+	private TextView windText;
+	private TextView tempText;
+	private TextView currentDateText;
 	private EditText searchcityEt;
 	private Button switchCity;
-	private Button RefreshWeather;
 	private LinearLayout weatherInfoLayout;
 
 	private PullToRefreshScrollView pullToRefreshScrollView;
@@ -78,12 +77,10 @@ public class WeatherActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.weather_layout);
 		init();
-		setListener();
-		
-		//初始化百度定位
+
+		// 初始化百度定位
 		mLocationClient = new LocationClient(getApplicationContext());
 		mMyLocationListener = new MyLocationListener();
 		mLocationClient.registerLocationListener(mMyLocationListener);
@@ -145,15 +142,20 @@ public class WeatherActivity extends BaseActivity {
 	}
 
 	private void init() {
-		weatherInfoLayout = (LinearLayout) findViewById(R.id.ll_weatherInfo);
 		cityNameText = (TextView) findViewById(R.id.tv_cityName);
 		publishText = (TextView) findViewById(R.id.tv_publishText);
 		DescriptionText = (TextView) findViewById(R.id.tv_description);
 		tempText = (TextView) findViewById(R.id.tv_temp);
 		windText = (TextView) findViewById(R.id.tv_wind);
 		currentDateText = (TextView) findViewById(R.id.tv_date);
+
 		switchCity = (Button) findViewById(R.id.switch_city);
+		switchCity.setOnClickListener(this);
 		pullToRefreshScrollView = (PullToRefreshScrollView) findViewById(R.id.pull_to_refresh_listview);
+		pullToRefreshScrollView.setOnRefreshListener(this);
+		filterList = (ListView) findViewById(R.id.lv_filterlist);
+		weatherInfoLayout = (LinearLayout) findViewById(R.id.ll_weatherInfo);
+
 		slidingMenu = new SlidingMenu(this);
 		slidingMenu.setMode(SlidingMenu.LEFT);
 		slidingMenu.setFadeDegree(0.35f);
@@ -161,9 +163,8 @@ public class WeatherActivity extends BaseActivity {
 		slidingMenu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
 		slidingMenu.setMenu(R.layout.slidingmenu);
 		slidingMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
-		filterList = (ListView) findViewById(R.id.lv_filterlist);
-		searchcityEt = (EditText) findViewById(R.id.et_searchcity);
-
+		searchcityEt = (EditText) slidingMenu.findViewById(R.id.et_searchcity);
+		searchcityEt.addTextChangedListener(textWatcher);
 	}
 
 	private void showWeather() {
@@ -222,54 +223,48 @@ public class WeatherActivity extends BaseActivity {
 		});
 	}
 
-	private void setListener() {
-		switchCity.setOnClickListener(new OnClickListener() {
+	@Override
+	public void onClick(View v) {
+		super.onClick(v);
+		switch (v.getId()) {
+		case R.id.switch_city:
+			mLocationClient.start();
+			break;
 
-			@Override
-			public void onClick(View v) {
-				// Intent intent = new Intent(WeatherActivity.this,
-				// ChooseAreaActivity.class);
-				// intent.putExtra("from_weather_activity", true);
-				// startActivity(intent);
-				// finish();
-				mLocationClient.start();
+		default:
+			break;
+		}
+	}
+
+	private TextWatcher textWatcher = new TextWatcher() {
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			String key = searchcityEt.getText().toString();
+			if (key != null && !TextUtils.isEmpty(key)) {
+				queryFromDatebase(key);
 			}
-		});
-		pullToRefreshScrollView.setOnRefreshListener(new OnRefreshListener<ScrollView>() {
+		}
 
-			@Override
-			public void onRefresh(PullToRefreshBase<ScrollView> refreshView) {
-				String label = DateUtils.formatDateTime(getApplicationContext(), System.currentTimeMillis(), DateUtils.FORMAT_SHOW_TIME
-						| DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		}
 
-				// Update the LastUpdatedLabel
-				refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
+		@Override
+		public void afterTextChanged(Editable s) {
+		}
+	};
 
-				// Do work to refresh the list here.
-				new GetDataTask().execute();
-			}
+	@Override
+	public void onRefresh(PullToRefreshBase<ScrollView> refreshView) {
+		String label = DateUtils.formatDateTime(getApplicationContext(), System.currentTimeMillis(), DateUtils.FORMAT_SHOW_TIME
+				| DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
 
-		});
-		searchcityEt.addTextChangedListener(new TextWatcher() {
+		// Update the LastUpdatedLabel
+		refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
 
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				String key = searchcityEt.getText().toString();
-				if (key != null && !TextUtils.isEmpty(key)) {
-					queryFromDatebase(key);
-				}
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-
-			}
-		});
+		// Do work to refresh the list here.
+		new GetDataTask().execute();
 	}
 
 	private class GetDataTask extends AsyncTask<Void, Void, String[]> {
@@ -293,36 +288,55 @@ public class WeatherActivity extends BaseActivity {
 		}
 	}
 
-	private void getWeatherInfo(String a, String b) {
+	/**
+	 * 发送请求获取天气
+	 * 
+	 * @param a
+	 * @param b
+	 */
+	private void getWeatherInfo(String Latitude, String Longitude) {
 		HttpUtils httpUtils = new HttpUtils();
-		String url = Constant.WEATHER_URL + b + "," + a + "&output=json&ak=" + Constant.BAIDU_AK + "&mcode=" + Constant.BAIDU_MCODE;
+		String url = Constant.WEATHER_URL + Longitude + "," + Latitude + "&output=json&ak=" + Constant.BAIDU_AK + "&mcode="
+				+ Constant.BAIDU_MCODE;
 		System.out.println(url);
-		httpUtils.send(HttpMethod.GET, url, new RequestCallBack<String>() {
+		httpUtils.send(HttpMethod.GET, url, new HttpCallBack());
+	}
 
-			@Override
-			public void onFailure(HttpException arg0, String arg1) {
-				Toast.makeText(WeatherActivity.this, arg1, Toast.LENGTH_LONG).show();
-			}
+	class HttpCallBack extends RequestCallBack<String> {
 
-			@Override
-			public void onSuccess(ResponseInfo<String> arg0) {
-				Gson gson = new Gson();
-				JsonInfo jsonInfo = gson.fromJson(arg0.result, JsonInfo.class);
-				WeatherResults weatherResults = jsonInfo.getResults().get(0);
-				ArrayList<WeatherData> weatherDatas = (ArrayList<WeatherData>) weatherResults.getWeather_data();
-				WeatherData weatherData = weatherDatas.get(0);
-				System.out.println(weatherData.getDate() + weatherData.getTemperature() + weatherData.getWind());
-				SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-				editor.putString("city_name", weatherResults.getCurrentCity());
-				editor.putString("temp", weatherData.getTemperature());
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
-				editor.putString("current_date", sdf.format(new Date()));
-				editor.putString("weather_desp", weatherData.getWeather());
-				editor.putString("wind", weatherData.getWind());
-				editor.commit();
-				showWeather();
-			}
-		});
+		@Override
+		public void onFailure(HttpException arg0, String arg1) {
+			Toast.makeText(WeatherActivity.this, arg1, Toast.LENGTH_LONG).show();
+		}
+
+		@Override
+		public void onSuccess(ResponseInfo<String> arg0) {
+			handleJson(arg0.result);
+			showWeather();
+		}
+
+	}
+
+	/**
+	 * 处理返回的JSON
+	 * 
+	 * @param result
+	 */
+	private void handleJson(String result) {
+		Gson gson = new Gson();
+		JsonInfo jsonInfo = gson.fromJson(result, JsonInfo.class);
+		WeatherResults weatherResults = jsonInfo.getResults().get(0);
+		ArrayList<WeatherData> weatherDatas = (ArrayList<WeatherData>) weatherResults.getWeather_data();
+		WeatherData weatherData = weatherDatas.get(0);
+		System.out.println(weatherData.getDate() + weatherData.getTemperature() + weatherData.getWind());
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+		editor.putString("city_name", weatherResults.getCurrentCity());
+		editor.putString("temp", weatherData.getTemperature());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
+		editor.putString("current_date", sdf.format(new Date()));
+		editor.putString("weather_desp", weatherData.getWeather());
+		editor.putString("wind", weatherData.getWind());
+		editor.commit();
 	}
 
 	private void queryFromDatebase(String key) {
@@ -345,5 +359,6 @@ public class WeatherActivity extends BaseActivity {
 			System.out.println(name);
 		}
 	}
+
 
 }
