@@ -1,25 +1,32 @@
 package com.qind.weather.model;
 
+import com.lidroid.xutils.db.annotation.Id;
+import com.lidroid.xutils.db.annotation.NoAutoIncrement;
+import com.lidroid.xutils.db.annotation.Table;
+
+@Table(name = "City")
 public class City {
-	private int id;
+	@Id
+	@NoAutoIncrement
+	private long cityCode;
+	private long provinceCode;
 	private String cityName;
-	private String cityCode;
-	private int provinceId;
+	private String provinceName;
 
-	public int getProvinceId() {
-		return provinceId;
+	public long getCityCode() {
+		return cityCode;
 	}
 
-	public void setProvinceId(int provinceId) {
-		this.provinceId = provinceId;
+	public void setCityCode(long cityCode) {
+		this.cityCode = cityCode;
 	}
 
-	public int getId() {
-		return id;
+	public long getProvinceCode() {
+		return provinceCode;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setProvinceCode(long provinceCode) {
+		this.provinceCode = provinceCode;
 	}
 
 	public String getCityName() {
@@ -30,12 +37,12 @@ public class City {
 		this.cityName = cityName;
 	}
 
-	public String getCityCode() {
-		return cityCode;
+	public String getProvinceName() {
+		return provinceName;
 	}
 
-	public void setCityCode(String cityCode) {
-		this.cityCode = cityCode;
+	public void setProvinceName(String provinceName) {
+		this.provinceName = provinceName;
 	}
 
 }

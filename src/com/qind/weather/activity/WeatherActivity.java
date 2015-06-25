@@ -1,13 +1,11 @@
 package com.qind.weather.activity;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -21,7 +19,6 @@ import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -43,14 +40,16 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest.HttpMethod;
+import com.lidroid.xutils.util.LogUtils;
 import com.qind.weather.R;
 import com.qind.weather.constant.Constant;
+import com.qind.weather.db.CityDao;
+import com.qind.weather.db.ProvinceDao;
 import com.qind.weather.db.SunshineDbOperation;
 import com.qind.weather.model.JsonInfo;
 import com.qind.weather.model.WeatherData;
 import com.qind.weather.model.WeatherResults;
-import com.qind.weather.utils.HttpUtil;
-import com.qind.weather.utils.HttpUtil.HttpCallbackListener;
+import com.qind.weather.utils.ProvinceUtility;
 import com.qind.weather.utils.Utility;
 import com.qind.weather.widget.ClearEditText;
 
@@ -86,10 +85,20 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		mMyLocationListener = new MyLocationListener();
 		mLocationClient.registerLocationListener(mMyLocationListener);
 		initLocation();
+		
 		if (SunshineApplication.isFirstLoad && Utility.isConnected(this)) {
 			mLocationClient.start();
 		} else if (Utility.isConnected(this) == false) {
 			Utility.openNetworkSetting(this);
+		}
+		
+		SQLiteDatabase database = new SunshineDbOperation(this).openDatabase();
+		Cursor cursor = database.query("City", null, "provinceName='江西'", null, null, null, null);
+		if (cursor != null && cursor.getCount() > 0) {
+			while (cursor.moveToNext()) {
+				LogUtils.e(cursor.getString(1));
+			}
+
 		}
 	}
 
@@ -181,55 +190,58 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		cityNameText.setVisibility(View.VISIBLE);
 	}
 
-	private void queryWeatherCode(String countyCode) {
-		String address = "http://www.weather.com.cn/data/list3/city" + countyCode + ".xml";
-		queryFromServer(address, "countyCode");
-	}
+	// private void queryWeatherCode(String countyCode) {
+	// String address = "http://www.weather.com.cn/data/list3/city" + countyCode
+	// + ".xml";
+	// queryFromServer(address, "countyCode");
+	// }
+	//
+	// private void queryWeatherInfo(String weatherCode) {
+	// String address = "http://m.weather.com.cn/data/" + weatherCode + ".html";
+	// System.out.println("address: " + address);
+	// queryFromServer(address, "weatherCode");
+	// }
 
-	private void queryWeatherInfo(String weatherCode) {
-		String address = "http://m.weather.com.cn/data/" + weatherCode + ".html";
-		System.out.println("address: " + address);
-		queryFromServer(address, "weatherCode");
-	}
-
-	private void queryFromServer(final String address, final String type) {
-		HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
-
-			@Override
-			public void onFinish(String response) {
-				if ("countyCode".equals(type)) {
-					if (!TextUtils.isEmpty(response)) {
-						String[] array = response.split("\\|");
-						if (array != null && array.length == 2) {
-							String weatherCode = array[1];
-							queryWeatherInfo(weatherCode);
-						}
-					}
-				} else if ("weatherCode".equals(type)) {
-					Utility.handleWeatherResponse(WeatherActivity.this, response);
-					runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							showWeather();
-						}
-					});
-				}
-			}
-
-			@Override
-			public void onFailed(Exception e) {
-				publishText.setText("同步失败");
-			}
-		});
-	}
+	// private void queryFromServer(final String address, final String type) {
+	// HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
+	//
+	// @Override
+	// public void onFinish(String response) {
+	// if ("countyCode".equals(type)) {
+	// if (!TextUtils.isEmpty(response)) {
+	// String[] array = response.split("\\|");
+	// if (array != null && array.length == 2) {
+	// String weatherCode = array[1];
+	// queryWeatherInfo(weatherCode);
+	// }
+	// }
+	// } else if ("weatherCode".equals(type)) {
+	// Utility.handleWeatherResponse(WeatherActivity.this, response);
+	// runOnUiThread(new Runnable() {
+	//
+	// @Override
+	// public void run() {
+	// showWeather();
+	// }
+	// });
+	// }
+	// }
+	//
+	// @Override
+	// public void onFailed(Exception e) {
+	// publishText.setText("同步失败");
+	// }
+	// });
+	// }
 
 	@Override
 	public void onClick(View v) {
 		super.onClick(v);
 		switch (v.getId()) {
 		case R.id.switch_city:
-			mLocationClient.start();
+			// mLocationClient.start();
+			// Intent intent = new Intent(this,ChooseAreaActivity.class);
+			// startActivity(intent);
 			break;
 
 		default:
@@ -251,7 +263,7 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		public void afterTextChanged(Editable s) {
 			String key = searchcityEt.getText().toString();
 			if (!TextUtils.isEmpty(key)) {
-				queryFromDatebase(key);
+				// queryFromDatebase(key);
 			}
 		}
 	};
@@ -299,7 +311,13 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		HttpUtils httpUtils = new HttpUtils();
 		String url = Constant.WEATHER_URL + Longitude + "," + Latitude + "&output=json&ak=" + Constant.BAIDU_AK + "&mcode="
 				+ Constant.BAIDU_MCODE;
-		System.out.println(url);
+		httpUtils.send(HttpMethod.GET, url, new HttpCallBack());
+	}
+
+	private void getWeatherInfo(String countyName) {
+		HttpUtils httpUtils = new HttpUtils();
+		String url = Constant.WEATHER_URL + countyName + "&output=json&ak=" + Constant.BAIDU_AK + "&mcode=" + Constant.BAIDU_MCODE;
+		LogUtils.d(url);
 		httpUtils.send(HttpMethod.GET, url, new HttpCallBack());
 	}
 
@@ -312,6 +330,7 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 
 		@Override
 		public void onSuccess(ResponseInfo<String> arg0) {
+			LogUtils.d(arg0.result);
 			handleJson(arg0.result);
 			showWeather();
 		}
@@ -340,26 +359,29 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		editor.commit();
 	}
 
-	private void queryFromDatebase(String key) {
-		SQLiteDatabase db = SunshineDbOperation.getInstance(this).getWritableDatabase();
-		if (!db.isOpen()) {
-			db = SunshineDbOperation.getInstance(this).getReadableDatabase();
-		}
-
-		List<Map<String, String>> cityList = new ArrayList<Map<String, String>>();
-
-		Cursor cursor = null;
-		if (null != key && !TextUtils.isEmpty(key)) {
-			cursor = db.query("County", null, "county_name like ? ", new String[] { "%" + key + "%" }, null, null, null);
-		}
-		if (cursor != null && cursor.getCount() > 0) {
-			while (cursor.moveToNext()) {
-				Map<String, String> stockMap = new HashMap<String, String>();
-				String name = cursor.getString(1);
-				stockMap.put("name", name);
-				System.out.println(name);
-			}
-		}
-	}
+	// private void queryFromDatebase(String key) {
+	// SQLiteDatabase db =
+	// SunshineDbOperation.getInstance(this).getWritableDatabase();
+	// if (!db.isOpen()) {
+	// db = SunshineDbOperation.getInstance(this).getReadableDatabase();
+	// }
+	//
+	// List<Map<String, String>> cityList = new ArrayList<Map<String,
+	// String>>();
+	//
+	// Cursor cursor = null;
+	// if (null != key && !TextUtils.isEmpty(key)) {
+	// cursor = db.query("County", null, "county_name like ? ", new String[] {
+	// "%" + key + "%" }, null, null, null);
+	// }
+	// if (cursor != null && cursor.getCount() > 0) {
+	// while (cursor.moveToNext()) {
+	// Map<String, String> stockMap = new HashMap<String, String>();
+	// String name = cursor.getString(1);
+	// stockMap.put("name", name);
+	// System.out.println(name);
+	// }
+	// }
+	// }
 
 }

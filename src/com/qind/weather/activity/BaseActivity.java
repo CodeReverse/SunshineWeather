@@ -20,4 +20,10 @@ public class BaseActivity extends Activity implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		AppManager.getInstance().finishActivity(this);
+	}
 }

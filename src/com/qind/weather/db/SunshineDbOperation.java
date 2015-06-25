@@ -1,149 +1,70 @@
 package com.qind.weather.db;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import com.qind.weather.model.City;
-import com.qind.weather.model.County;
-import com.qind.weather.model.Province;
-
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
+
+import com.qind.weather.R;
 
 public class SunshineDbOperation {
-	public static final String DB_NAME = "sunshine_weather";
-	public static final int DB_VERSION = 1;
-	private static SunshineDbOperation sunshineDbOperation;
-	private static SQLiteDatabase db;
-	private SunshineWeatherDbHelper dbHelper;
+	private Context mContext;
+	private SQLiteDatabase database;
 
-	private SunshineDbOperation(Context context) {
-		dbHelper = new SunshineWeatherDbHelper(context, DB_NAME, null,
-				DB_VERSION);
-		db = dbHelper.getWritableDatabase();
+	public SunshineDbOperation(Context context) {
+		mContext = context;
 	}
 
-	public synchronized static SunshineDbOperation getInstance(Context context) {
-		if (sunshineDbOperation == null) {
-			sunshineDbOperation = new SunshineDbOperation(context);
+	// 文件的路径
+	private final int BUFFER_SIZE = 400000;
+	public final static String URL = "/data/data/com.qind.weather/files";
+	public static final String PACKAGE_NAME = "com.qind.weather";
+	public static final String DB_PATH = "/data" + Environment.getDataDirectory().getAbsolutePath() + "/" + PACKAGE_NAME; // 在手机里存放数据库的位置
+	public final static String DB_NAME = "sunshine.db";
+
+	public SQLiteDatabase openDatabase() {
+		this.database = this.openDatabase(DB_PATH + "/" + DB_NAME);
+		return database;
+	}
+
+	private SQLiteDatabase openDatabase(String dbfile) {
+		try {
+			File file = new File(dbfile);
+			if (file.exists()) {
+				file.delete();
+				InputStream is = mContext.getResources().openRawResource(R.raw.sunshine); // 欲导入的数据库
+				FileOutputStream fos = new FileOutputStream(dbfile);
+				byte[] buffer = new byte[BUFFER_SIZE];
+				int count = 0;
+				while ((count = is.read(buffer)) > 0) {
+					fos.write(buffer, 0, count);
+				}
+				fos.close();
+				is.close();
+			} else {// 判断数据库文件是否存在，若不存在则执行导入，否则直接打开数据库
+				InputStream is = mContext.getResources().openRawResource(R.raw.sunshine); // 欲导入的数据库
+				FileOutputStream fos = new FileOutputStream(dbfile);
+				byte[] buffer = new byte[BUFFER_SIZE];
+				int count = 0;
+				while ((count = is.read(buffer)) > 0) {
+					fos.write(buffer, 0, count);
+				}
+				fos.close();
+				is.close();
+			}
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(dbfile, null);
+			return db;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return sunshineDbOperation;
-
+		return null;
 	}
 
-	public SQLiteDatabase getWritableDatabase() {
-		return db;
-	}
-
-	public SQLiteDatabase getReadableDatabase() {
-		return dbHelper.getReadableDatabase();
-	}
-
-	/*
-	 * 将Province实例存储到数据库
-	 */
-	public void saveProvince(Province province) {
-		if (province != null) {
-			ContentValues contentValues = new ContentValues();
-			contentValues.put("province_name", province.getProvinceName());
-			contentValues.put("province_code", province.getProvinceCode());
-			db.insert("Province", null, contentValues);
-		}
-	}
-
-	/*
-	 * 从数据库读取全国所有的省份信息
-	 */
-	public List<Province> loadProvinces() {
-		List<Province> list = new ArrayList<Province>();
-		Cursor cursor = db
-				.query("Province", null, null, null, null, null, null);
-		if (cursor.moveToFirst()) {
-			do {
-				Province province = new Province();
-				province.setId(cursor.getInt(cursor.getColumnIndex("id")));
-				province.setProvinceName(cursor.getString(cursor
-						.getColumnIndex("province_name")));
-				province.setProvinceCode(cursor.getString(cursor
-						.getColumnIndex("province_code")));
-				list.add(province);
-			} while (cursor.moveToNext());
-		}
-		return list;
-
-	}
-
-	/*
-	 * 将City实例存储到数据库
-	 */
-	public void saveCity(City city) {
-		if (city != null) {
-			ContentValues contentValues = new ContentValues();
-			contentValues.put("city_name", city.getCityName());
-			contentValues.put("city_code", city.getCityCode());
-			contentValues.put("province_id", city.getProvinceId());
-			db.insert("City", null, contentValues);
-		}
-	}
-
-	/*
-	 * 从数据库读取某省下所有的城市信息
-	 */
-	public List<City> loadCities(int provinceId) {
-		List<City> list = new ArrayList<City>();
-		Cursor cursor = db.query("City", null, "province_id=?",
-				new String[] { String.valueOf(provinceId) }, null, null, null);
-		if (cursor.moveToFirst()) {
-			do {
-				City city = new City();
-				city.setId(cursor.getInt(cursor.getColumnIndex("id")));
-				city.setCityName(cursor.getString(cursor
-						.getColumnIndex("city_name")));
-				city.setCityCode(cursor.getString(cursor
-						.getColumnIndex("city_code")));
-				city.setProvinceId(provinceId);
-				list.add(city);
-			} while (cursor.moveToNext());
-		}
-		return list;
-
-	}
-
-	/*
-	 * 将County实例存储到数据库
-	 */
-	public void saveCounty(County county) {
-		if (county != null) {
-			ContentValues contentValues = new ContentValues();
-			contentValues.put("county_name", county.getCountyName());
-			contentValues.put("county_code", county.getCountyCode());
-			contentValues.put("city_id", county.getCityId());
-			db.insert("County", null, contentValues);
-		}
-	}
-
-	/*
-	 * 从数据库读取某城市下所有的县信息
-	 */
-	public List<County> loCounties(int cityId) {
-		List<County> list = new ArrayList<County>();
-		Cursor cursor = db.query("County", null, "city_id = ?",
-				new String[] { String.valueOf(cityId) }, null, null, null);
-		if (cursor.moveToFirst()) {
-			do {
-				County county = new County();
-				county.setId(cursor.getInt(cursor.getColumnIndex("id")));
-				county.setCountyName(cursor.getString(cursor
-						.getColumnIndex("county_name")));
-				county.setCountyCode(cursor.getString(cursor
-						.getColumnIndex("county_code")));
-				county.setCityId(cityId);
-				list.add(county);
-			} while (cursor.moveToNext());
-		}
-		return list;
-
-	}
 }
