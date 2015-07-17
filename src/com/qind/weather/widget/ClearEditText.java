@@ -1,7 +1,5 @@
 package com.qind.weather.widget;
 
-import com.qind.weather.R;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -12,11 +10,14 @@ import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.widget.EditText;
 
+import com.qind.weather.R;
+
 public class ClearEditText extends EditText implements OnFocusChangeListener, TextWatcher {
 	/**
 	 * 删除按钮的引用
 	 */
 	private Drawable mClearDrawable;
+	
 	/**
 	 * 控件是否有焦点
 	 */
@@ -68,6 +69,10 @@ public class ClearEditText extends EditText implements OnFocusChangeListener, Te
 		return super.onTouchEvent(event);
 	}
 
+	public interface ClearCallBack{
+		void onSuccess();
+	}
+	
 	/**
 	 * 当ClearEditText焦点发生变化的时候，判断里面字符串长度设置清除图标的显示与隐藏
 	 */

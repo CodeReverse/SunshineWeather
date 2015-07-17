@@ -19,4 +19,9 @@ public class WeatherInfoFragment extends Fragment {
 			Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.weather_info, container);
 	}
+	
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+	}
 }

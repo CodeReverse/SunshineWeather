@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -17,6 +18,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -51,6 +53,7 @@ import com.qind.weather.model.WeatherData;
 import com.qind.weather.model.WeatherResults;
 import com.qind.weather.utils.Utility;
 import com.qind.weather.widget.ClearEditText;
+import com.qind.weather.widget.ClearEditText.ClearCallBack;
 
 public class WeatherActivity extends BaseActivity implements OnRefreshListener<ScrollView> {
 	private TextView cityNameText;
@@ -66,13 +69,15 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 	private PullToRefreshScrollView pullToRefreshScrollView;
 	private SlidingMenu slidingMenu;
 	private GridView listGridView;
-	private List<String> mListItems;
+	private ArrayList<String> mListItems;
+	private ArrayList<String> tempItems;
 	private CityListAdapter adapter;
 
 	private LocationClient mLocationClient;
 	public MyLocationListener mMyLocationListener;
 	private LocationMode mode = LocationMode.Hight_Accuracy;
 	private String coor = "gcj02";
+	private SQLiteDatabase mDatabase;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -92,14 +97,15 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 			Utility.openNetworkSetting(this);
 		}
 
-		SQLiteDatabase database = new SunshineDbOperation(this).openDatabase();
-		Cursor cursor = database.query("Province", new String[]{"provinceName"} ,null, null, null, null, null);
+		mDatabase = new SunshineDbOperation(this).openDatabase();
+		Cursor cursor = mDatabase.query("Province", new String[] { "provinceName" }, null, null, null, null, null);
 		if (cursor != null && cursor.getCount() > 0) {
 			while (cursor.moveToNext()) {
 				mListItems.add(cursor.getString(0));
 				LogUtils.e(cursor.getString(0));
 			}
-
+			tempItems = (ArrayList<String>) mListItems.clone();
+			LogUtils.e(tempItems.toString());
 		}
 	}
 
@@ -152,6 +158,7 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void init() {
 		cityNameText = (TextView) findViewById(R.id.tv_cityName);
 		publishText = (TextView) findViewById(R.id.tv_publishText);
@@ -176,7 +183,7 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		searchcityEt = (ClearEditText) slidingMenu.findViewById(R.id.et_searchcity);
 		searchcityEt.addTextChangedListener(textWatcher);
 		listGridView = (GridView) slidingMenu.findViewById(R.id.gridview_list);
-		mListItems = new LinkedList<String>();
+		mListItems = new ArrayList<String>();
 		adapter = new CityListAdapter(this, mListItems);
 		listGridView.setAdapter(adapter);
 	}
@@ -212,6 +219,14 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 
 		@Override
 		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			if (TextUtils.isEmpty(s)) {
+				mListItems.clear();
+				for(int i = 0 ;i<tempItems.size() ;i++){
+					mListItems.add(tempItems.get(i));
+				}
+				adapter.notifyDataSetChanged();
+			}
+		
 		}
 
 		@Override
@@ -222,7 +237,16 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 		public void afterTextChanged(Editable s) {
 			String key = searchcityEt.getText().toString();
 			if (!TextUtils.isEmpty(key)) {
-				// queryFromDatebase(key);
+				Cursor cursor = mDatabase.query("City", new String[] { "cityName,provinceName" }, "cityName =? or provinceName = ?",
+						new String[] { key, key }, null, null, null);
+				if (cursor != null && cursor.getCount() > 0) {
+					mListItems.clear();
+					while (cursor.moveToNext()) {
+						mListItems.add(cursor.getString(0));
+						LogUtils.e(cursor.getString(0));
+					}
+				}
+				adapter.notifyDataSetChanged();
 			}
 		}
 	};
@@ -237,6 +261,11 @@ public class WeatherActivity extends BaseActivity implements OnRefreshListener<S
 
 		// Do work to refresh the list here.
 		new GetDataTask().execute();
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		return super.onTouchEvent(event);
 	}
 
 	private class GetDataTask extends AsyncTask<Void, Void, String[]> {
